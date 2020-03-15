@@ -19,6 +19,8 @@ How to push/pull to R Studio: Use the Git tab at the top left corner next to Con
 
 * Write text in the box, anything will do. Ex: testing 1, typically this is suppose to be what changes you've made
 
+* Press commit
+
 * Press Push
 
 You can make sure it went to Github properly by going to the page.
