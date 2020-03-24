@@ -5,4 +5,17 @@ date: "3/15/2020"
 output: html_document
 ---
 
+```{r}
+library(readxl)
+
+house <- read_excel("Housing.xlsx")
+```
+
+```{r}
+str(house)
+```
+
+```{r}
+which(is.na(house))
+```
 
