@@ -19,3 +19,7 @@ str(house)
 which(is.na(house))
 ```
 
+```{r}
+plot(house[1:9])
+```
+
