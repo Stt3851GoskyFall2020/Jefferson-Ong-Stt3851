@@ -5,7 +5,8 @@ date: "3/15/2020"
 output: html_document
 ---
 
-```{r, echo = F}
+
+```{r , comment= NA, warning= F, message = FALSE}
 library(readxl)
 library(tidyverse)
 house <- read_excel("Housing.xlsx")
@@ -20,8 +21,10 @@ str(house)
 summary(house)
 ```
 
+* Here is a quick look at the dataset
 
-```{r}
+
+```{r, comment= NA}
 which(is.na(house))
 ```
 
@@ -31,14 +34,16 @@ which(is.na(house))
 
 ## Do any values need clarification or modification?
 
-Yes status should be a factor rather than just characters. Here we changed status of the house into a factor of three levels where sld = 1, meaning 1 when the house is sold, pen = 2 where the house is pending sale, and act = 3 where house is in the active listing. We did the same for the elementary school distrinct
+* Yes status should be a factor rather than just characters. 
 
-```{r}
+```{r, comment= NA}
 unique(house$status)
 unique(house$elem)
 ```
 
-```{r}
+* We needed to see all the different elements in these variables. 
+
+```{r, comment= NA}
 
 house$status <- as.factor(c("sld" = "1", "pen" = "2", "act" = "3")[house$status])
 house$status
@@ -46,7 +51,7 @@ house$elem <- as.factor(c("edison" = "1", "adams" = "2", "parker" = "3", "edge" 
 house$elem
 ```
 
-
+* Here we changed status of the house into a factor of three levels where sld = 1, meaning 1 when the house is sold, pen = 2 where the house is pending sale, and act = 3 where house is in the active listing. We did the same for the elementary school distrinct
 
 _____
 
@@ -55,17 +60,17 @@ _____
 
 ## Scatterplot
 
-```{r}
+```{r, comment= NA}
 plot(house[1:10])
 ```
 
-If we look at the second row of this multi-scatterplot, we can see the relationship of price as y against all the other variables individually. We can see that bath, bedroom, garagesize, and status are discrete variables. We can consider them as factors where a house's bathroom will either have 1, 2, or 3 bathrooms but for now we won't, in an extreme case of a house having more than 3 bathroom. Where as a house can only have three states. 
+* If we look at the second row of this multi-scatterplot, we can see the relationship of price as y against all the other variables individually. We can see that bath, bedroom, garagesize, and status are discrete variables. We can consider them as factors where a house's bathroom will either have 1, 2, or 3 bathrooms but for now we won't, in an extreme case of a house having more than 3 bathroom. Where as a house can only have three states. 
 
 ## Correlation plot
 
 The variables: size, lot, bedrooms, yearbuilt/agestandardized has outliers
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 cor(house[, c(1:9)])
 
 library("PerformanceAnalytics")
@@ -94,7 +99,7 @@ plot(sample)
 ## Outliers
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 
 OutVals = boxplot(house$size, plot = T)$out
 which(house$size %in% OutVals)
@@ -113,7 +118,7 @@ which(house$garagesize %in% OutVals)
 * We went ahead and look at size, lot, bath, bedroom, yearbuilt, and garagesize for outliers since id is just an index, price because it's what we're tryin to predict, and agestandardized as it will give the same as yearbuilt. Boxplot would not be appropriate in for status and elem since it wouldn't make sense. 
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 house$size[c(4, 20, 76)]
 house$lot[c(74)]
 #house$bath 
@@ -126,13 +131,13 @@ house$yearbuilt[c(35, 52, 54, 64)]
 
 * We then looked at the individual points to see if the data can explain why these particular points are outliers. We found that houses built before the 1920 has the 6 bedroom home which explains some of the negative correlation between price and bedroom numbers. An intuition would be that older homes, especially those before the 1920s will cost more and have more bedrooms. 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 house[c(74, 76),]
 ```
 
 * We then looked at the row 74 and 76 since 74 had a particuarly large lot and 76 had a huge size. We found that theres nothing apparent that would explain this deviation and decided to remove them because of this. They aren't representative of the data at hand. We will also remove id as it isn't needed for our analysis
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 house <- house[-c(74,76), ]
 house <- subset(house, select = -id )
 str(house)
@@ -144,7 +149,7 @@ _________
 
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 model1 <- lm(price ~. -agestandardized , house)
 summary(model1)
 ```
@@ -169,7 +174,7 @@ Consider modifying your model based upon your initial results and/or diagnostic 
 
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 library(car)
 vif(model1)
 ```
@@ -177,7 +182,7 @@ vif(model1)
 * Using the GVIF^(1/(2*Df)) since elem has 5 coefficients and status has df 2, for all the different factors. There isn't much multicollinearity between the predictor variables.
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 model2 <- lm(price ~. -agestandardized -yearbuilt -bath -lot -garagesize, house)
 summary(model2)
 vif(model2)
@@ -188,12 +193,12 @@ vif(model2)
  
 * The p value on the f-statistic shows us this is a significant model overall with a R^2 of 49%, adjusted of 41%. 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 par(mfrow = c(2,2))
 plot(model2)
 ```
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 house[4,]
 ```
 
@@ -202,7 +207,7 @@ house[4,]
 * We can see from the plot diagnostics that we aren't violating any underlying assumptions for linear regression modelling. 
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 model3 <- lm(price ~. -agestandardized -yearbuilt -bath -lot -garagesize + agestandardized:size, house)
 summary(model3)
 par(mfrow = c(2,2))
@@ -211,7 +216,7 @@ plot(model3)
 
 * Here we've looked at the interaction term that we thought we be significant earlier from looking at the data. We find out that is it not. 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 model4 <- lm(log(price) ~. -agestandardized -yearbuilt -bath -lot -garagesize, house)
 summary(model4)
 par(mfrow = c(2,2))
@@ -220,7 +225,7 @@ plot(model4)
 
 * We applied a transformation on the Y response variable, seeing if it will yield to better plot diagnostics. It doesn't change much for the most part aside from the residual vs fitted plot being more spread out but curving more drastically. 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 model4 <- lm(price ~ elem + status + I(size /100) + bedrooms, house)
 summary(model4)
 par(mfrow = c(2,2))
@@ -237,7 +242,7 @@ _____
 Present your final model and diagnostic plots in support of that final model.  In that presentation of the final model, comment on the R-squared value and its interpretation, give 95% confidence intervals for each of the β coefficients in your model, and illustrate your model’s use with a 95% confidence interval for the mean response and a 95% prediction interval for individual response for a hypothetical house of your choosing.
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 modelf <- lm(price ~ elem + status + size + bedrooms, house)
 summary(modelf)
 par(mfrow = c(2,2))
@@ -249,13 +254,34 @@ plot(modelf)
 
 * The R^2 value is 0.4909 which mean that the model explains about 49% of the variation. Looking at the adjusted R^2 of 0.4193 we're penalized by the amount of variables in the model. 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 confint(modelf)
 ```
 
 * This is the β coefficients in your model, we are 95% confidence that the actual point is between these numbers. 
 
-```{r}
+* We can be 95% confident that the actual value for elem2 is between -147.083452 to -29.326497.
+
+* We can be 95% confident that the actual value for elem3 is between -125.974296 to -54.054080.
+
+* We can be 95% confident that the actual value for elem4 is between -110.188716 to -46.906813.
+
+* We can be 95% confident that the actual value for elem5 is between -76.117722  to -2.368995.
+
+* We can be 95% confident that the actual value for elem6 is between -127.375332 to -27.352433.
+
+* We can be 95% confident that the actual value for status2 is between  2.627647 to 62.494973.
+
+* We can be 95% confident that the actual value for status3 is between 19.442006 to 71.999903.
+
+* We can be 95% confident that the actual value for size is between 15.759564 to 141.087464.
+
+* We can be 95% confident that the actual value for bedrooms is between -35.326602 to -4.198871.
+
+
+
+
+```{r, comment= NA, warning= F, message = FALSE}
 newhouse <- data.frame(size = 2, bedrooms  = 4, status = "1", elem = "3")
 predict(modelf, newdata = newhouse, interval = 'confidence')
 ```
@@ -264,7 +290,7 @@ predict(modelf, newdata = newhouse, interval = 'confidence')
 * Base on the model, a house with these predictors will have a price of 199.6205 to 251.8815
 
 
-```{r}
+```{r, comment= NA, warning= F, message = FALSE}
 newhouse <- data.frame(size = 2, bedrooms  = 4, status = "1", elem = "3")
 predict(modelf, newdata = newhouse, interval = 'predict')
 ```
