@@ -1,8 +1,17 @@
 ---
-title: "Project 1 Multiple Regression"
+title: "Project 1 Multiple Regression ☺"
 author: "Jefferson Ong, Jayne Hollar, Céline Prunet"
-date: "3/15/2020"
-output: html_document
+date: '`r format(Sys.time(), "%b %d, %Y at %X")`'
+
+output:
+
+  bookdown::html_document2:
+
+    highlight: textmate
+
+    theme: yeti
+
+
 ---
 
 
@@ -16,7 +25,7 @@ house <- read_excel("Housing.xlsx")
 
 Examine the statistics and values for each variable.  Are any missing?  Do any values need clarification or modification?  If so, why and what did you do?
 
-```{r, comment = NA}
+```{r, comment = NA, eval=FALSE}
 str(house)
 summary(house)
 ```
@@ -51,7 +60,7 @@ house$elem <- as.factor(c("edison" = "1", "adams" = "2", "parker" = "3", "edge" 
 house$elem
 ```
 
-* Here we changed status of the house into a factor of three levels where sld = 1, meaning 1 when the house is sold, pen = 2 where the house is pending sale, and act = 3 where house is in the active listing. We did the same for the elementary school distrinct
+* Here we changed status of the house into a factor of three levels where sld = 1, meaning 1 when the house is sold, pen = 2 where the house is pending sale, and act = 3 where house is in the active listing. We did the same for the elementary school district
 
 _____
 
@@ -68,7 +77,6 @@ plot(house[1:10])
 
 ## Correlation plot
 
-The variables: size, lot, bedrooms, yearbuilt/agestandardized has outliers
 
 ```{r, comment= NA, warning= F, message = FALSE}
 cor(house[, c(1:9)])
@@ -76,46 +84,57 @@ cor(house[, c(1:9)])
 library("PerformanceAnalytics")
 chart.Correlation(house[, c(1:9)], histogram=TRUE, pch=19)
 ```
-                         id       price       size         lot       bath    bedrooms   yearbuilt agestandardized garagesize
-                         
-price            0.04662108  1.00000000 0.20143783  0.24423228  0.1746578 -0.28619746  0.15412476      0.15412476  0.3583861
+
+
+  - id: 0.04662108
+  - price: 1.00000000
+  - size: 0.20143783
+  - lot: 0.24423228
+  - bath: 0.1746578
+  - bedrooms: -0.28619746
+  - yearbuilt: 0.15412476
+  - agestandardized: 0.15412476 
+  - garagesize: 0.3583861
 
 * Here we can see that price as a single predictor against the other variables. We can see that individually each predictor doesn't correlate strongly to price. 
 
 
-Examine some of the variables relationships with price to help you determine which variables might be useful in an initial model.  Explain your conclusions from this initial screening.
+* Examine some of the variables relationships with price to help you determine which variables might be useful in an initial model.  Explain your conclusions from this initial screening.
 
 * We can see that the promising predictor variables are garagesize, lot, bedrooms(negatively). We can look further in size, bath, yearbuilt/agestandardized if we need more predictors. It makes sense that id doesn't predict anythign since its just an index and that yearbuilt and agestandardized are the same since agestandardized is just a transformation of yearbuilt. 
 
-* We wanted to see why bedroom is negatively correlated since it's not intuitive that having more bedrooms mean that the house is a lower price. We can see from the scatterplot that houses that have 4 or more bedrooms typically cost less than the 2 or 3 bedroom counterparts. 
+ 
 
 ```{r}
-sample <- house %>%
+test <- house %>%
   select(bedrooms, price) %>%
   arrange(bedrooms)
-plot(sample)
+plot(test)
 ```
+
+* We wanted to see why bedroom is negatively correlated since it's not intuitive that having more bedrooms mean that the house is a lower price. We can see from the scatterplot that houses that have 4 or more bedrooms typically cost less than the 2 or 3 bedroom counterparts.
 
 ## Outliers
 
 
+
 ```{r, comment= NA, warning= F, message = FALSE}
 
-OutVals = boxplot(house$size, plot = T)$out
+OutVals = boxplot(house$size, plot = T, main = "size")$out
 which(house$size %in% OutVals)
-OutVals = boxplot(house$lot, plot = T)$out
+OutVals = boxplot(house$lot, plot = T, main = "lot")$out
 which(house$lot %in% OutVals)
-OutVals = boxplot(house$bath, plot = T)$out
+OutVals = boxplot(house$bath, plot = T, main = "bath")$out
 which(house$bath %in% OutVals)
-OutVals = boxplot(house$bedrooms, plot = T)$out
+OutVals = boxplot(house$bedrooms, plot = T, main = "bedrooms")$out
 which(house$bedrooms %in% OutVals)
-OutVals = boxplot(house$yearbuilt, plot = T)$out
+OutVals = boxplot(house$yearbuilt, plot = T, main = "year built")$out
 which(house$yearbuilt %in% OutVals)
-OutVals = boxplot(house$garagesize, plot = T)$out
+OutVals = boxplot(house$garagesize, plot = T, main = "garage size")$out
 which(house$garagesize %in% OutVals)
 ```
 
-* We went ahead and look at size, lot, bath, bedroom, yearbuilt, and garagesize for outliers since id is just an index, price because it's what we're tryin to predict, and agestandardized as it will give the same as yearbuilt. Boxplot would not be appropriate in for status and elem since it wouldn't make sense. 
+* We went ahead and look at size, lot, bath, bedroom, yearbuilt, and garagesize for outliers since id is just an index, price because it's what we're trying to predict, and agestandardized as it will give the same as yearbuilt. Boxplot would not be appropriate in for status and elem since it wouldn't make sense. 
 
 
 ```{r, comment= NA, warning= F, message = FALSE}
@@ -143,7 +162,8 @@ house <- subset(house, select = -id )
 str(house)
 ```
 
-_________
+* The variables: size, lot, bedrooms, yearbuilt/agestandardized has outliers
+
 
 # Initial Modeling:  
 
@@ -258,25 +278,25 @@ plot(modelf)
 confint(modelf)
 ```
 
-* This is the β coefficients in your model, we are 95% confidence that the actual point is between these numbers. 
+* These are the β coefficients in your model, we are 95% confident that the actual mean data point is between the 2.5% and 97.5% values.
 
-* We can be 95% confident that the actual value for elem2 is between -147.083452 to -29.326497.
+* We can be 95% confident that the actual mean value for elem2 is between -147.083452 to -29.326497.
 
-* We can be 95% confident that the actual value for elem3 is between -125.974296 to -54.054080.
+* We can be 95% confident that the actual mean value for elem3 is between -125.974296 to -54.054080.
 
-* We can be 95% confident that the actual value for elem4 is between -110.188716 to -46.906813.
+* We can be 95% confident that the actual mean value for elem4 is between -110.188716 to -46.906813.
 
-* We can be 95% confident that the actual value for elem5 is between -76.117722  to -2.368995.
+* We can be 95% confident that the actual mean value for elem5 is between -76.117722  to -2.368995.
 
-* We can be 95% confident that the actual value for elem6 is between -127.375332 to -27.352433.
+* We can be 95% confident that the actual mean value for elem6 is between -127.375332 to -27.352433.
 
-* We can be 95% confident that the actual value for status2 is between  2.627647 to 62.494973.
+* We can be 95% confident that the actual mean value for status2 is between  2.627647 to 62.494973.
 
-* We can be 95% confident that the actual value for status3 is between 19.442006 to 71.999903.
+* We can be 95% confident that the actual mean value for status3 is between 19.442006 to 71.999903.
 
-* We can be 95% confident that the actual value for size is between 15.759564 to 141.087464.
+* We can be 95% confident that the actual mean value for size is between 15.759564 to 141.087464.
 
-* We can be 95% confident that the actual value for bedrooms is between -35.326602 to -4.198871.
+* We can be 95% confident that the actual mean value for bedrooms is between -35.326602 to -4.198871.
 
 
 
@@ -287,7 +307,7 @@ predict(modelf, newdata = newhouse, interval = 'confidence')
 ```
 
 * 225.751 is the point estimate for this particular house
-* Base on the model, a house with these predictors will have a price of 199.6205 to 251.8815
+* Based on the model centered around the mean prediction values, we can be 95% confident a house with these predictors will have a price of 199.6205 to 251.8815
 
 
 ```{r, comment= NA, warning= F, message = FALSE}
@@ -295,21 +315,8 @@ newhouse <- data.frame(size = 2, bedrooms  = 4, status = "1", elem = "3")
 predict(modelf, newdata = newhouse, interval = 'predict')
 ```
 
-* 230.8879 is the point estimate for this particular house
-* Base on the model, 95% of prices with these predictors will have a price of 135.1932 to 326.5827
-
-
-
-
-
-
-
-
-
-
-
-
-
+* 225.751 is the point estimate for this particular house
+* Based on the model centered around the point estimate, 95% of houses with these predictors will have a price of 133.5833 to 317.9188
 
 
 

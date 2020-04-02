@@ -253,7 +253,7 @@ plot(modelf)
 confint(modelf)
 ```
 
-* This is the β coefficients in your model, we are 95% confidence that the actual point is between these numbers. 
+* This is the β coefficients in your model, we are 95% confident that the mean actual point is between these numbers. 
 
 ```{r}
 newhouse <- data.frame(size = 2, bedrooms  = 4, status = "1", elem = "3")
